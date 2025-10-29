@@ -1,0 +1,32 @@
+# Diretórios de Módulos e Compilação
+/node_modules
+/dist
+/build
+/data
+
+
+# Configuração e Chaves (Pode conter dados sensíveis!)
+# O arquivo de configuração principal não deve ser versionado
+config.yml
+config.json
+*.key  # Chaves privadas SSH
+*.pem  # Certificados e chaves (se usados para Git ou SSL)
+
+# Logs e Dados Temporários
+*.log
+*.tmp
+logs/
+
+# Wiki.js - Arquivos/Pastas Gerados (se o Git for usado para sincronização)
+# Se você estiver usando o Git Storage do Wiki.js, o conteúdo é salvo aqui.
+# NÃO versionar o conteúdo que é gerenciado pelo próprio Wiki.js.
+/data/repo/ 
+/assets/uploads/ # Arquivos de mídia enviados (imagens, documentos)
+
+# Arquivos de Sistema Específicos (macOS, Windows, etc.)
+.DS_Store
+Thumbs.db
+
+# Arquivos de Ambiente de Editor (Exemplo: VS Code, se não for um projeto compartilhado)
+.vscode/
+.idea/
