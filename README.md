@@ -1,163 +1,88 @@
-# Guia Passo a Passo: Servidor Wiki para Gestão do Conhecimento com Docker Compose
+# 🌟 Guia de Utilização Rápida: Seu Wiki Gollum
 
-Este guia detalhado apresenta o processo de configuração de um servidor wiki para gestão do conhecimento utilizando **Wiki.js** [1], uma plataforma moderna e poderosa, empacotada em containers Docker e orquestrada com Docker Compose.
+Bem-vindo(a) ao nosso Wiki, alimentado pelo **Gollum**!
 
-O uso de containers garante um ambiente isolado, portátil e de fácil manutenção para a sua base de conhecimento.
+Este Wiki é um repositório de conhecimento colaborativo onde você pode facilmente **visualizar, adicionar e atualizar** informações usando a interface do Gollum e o poder do controle de versão do **Git**.
 
-## 1. Escolha da Plataforma: Wiki.js
+---
 
-O Wiki.js foi escolhido por ser uma solução *open source* com as seguintes vantagens para gestão do conhecimento:
+## 🧐 O Que é o Gollum?
 
-| Característica | Descrição |
-| :--- | :--- |
-| **Tecnologia Moderna** | Construído em Node.js, oferecendo alta performance. |
-| **Editores Flexíveis** | Suporte a Markdown, HTML e um editor visual (WYSIWYG). |
-| **Gestão de Conteúdo** | Controle de versão, pesquisa poderosa e organização hierárquica. |
-| **Suporte a Docker** | Imagem oficial e documentação clara para uso com Docker Compose. |
+O Gollum é um aplicativo de wiki simples baseado no Git. Isso significa que **todas as páginas e todo o histórico de alterações são armazenados como um repositório Git**. Isso nos permite ter:
+* **Controle de Versão:** Rastreamento completo de quem mudou o quê e quando.
+* **Colaboração:** Fluxo de trabalho robusto e familiar para quem usa Git.
 
-## 2. Pré-requisitos
+---
 
-Para seguir este guia, você deve ter os seguintes softwares instalados em seu sistema operacional (Linux, macOS ou Windows):
+## 🚀 Como Contribuir (Adicionar/Atualizar Conteúdo)
 
-1.  **Docker:** A plataforma de containerização.
-2.  **Docker Compose:** Ferramenta para definir e executar aplicações multi-container Docker.
+A principal força deste Wiki reside na sua capacidade de ser atualizado via Git. Você tem **duas** formas principais de interagir com o conteúdo:
 
-## 3. Configuração do Projeto
+### Opção 1: Usando a Interface Web (Para Edições Rápidas)
 
-O projeto será composto por dois arquivos principais: `docker-compose.yml` (definição dos serviços) e `.env` (variáveis de ambiente, como senhas).
+Para a maioria das edições, o próprio Gollum facilita a vida.
 
-### Passo 3.1: Criar o Diretório do Projeto
+1.  **Acesse a Página:** Navegue até a página que deseja editar ou crie uma nova.
+2.  **Clique em "Editar":** Na parte superior, clique no botão **"Editar"**.
+3.  **Faça as Alterações:** Edite o conteúdo. O Gollum suporta vários formatos de marcação (Markdown é o padrão e o mais recomendado).
+4.  **Descreva a Mudança:** No campo **"Mensagem de Commit"**, **descreva de forma concisa** o que você alterou (Exemplo: "Adiciona seção sobre autenticação de API").
+5.  **Salve:** Clique em **"Salvar"**.
 
-Crie um novo diretório para o seu projeto e navegue até ele:
+> 💡 **Nota:** Ao salvar, o Gollum faz automaticamente um *commit* no repositório Git subjacente!
 
-```bash
-mkdir wiki-server
-cd wiki-server
-```
+### Opção 2: Usando o Git Localmente (Para Mudanças Maiores ou Estruturais)
 
-### Passo 3.2: Criar o Arquivo de Variáveis de Ambiente (`.env`)
+Para grandes mudanças, adição de vários arquivos, ou edição fora do navegador, use o fluxo de trabalho Git padrão.
 
-O arquivo `.env` armazenará as senhas e outras configurações sensíveis, mantendo-as fora do arquivo `docker-compose.yml` para maior segurança.
-
-Crie o arquivo `.env` com o seguinte conteúdo:
-
-```ini
-# Variáveis de Ambiente para o Docker Compose
-
-# Senha do usuário do banco de dados PostgreSQL.
-# MUDE "sua_senha_secreta_aqui" para uma senha forte e única.
-DB_PASSWORD=sua_senha_secreta_aqui
-
-# Email e senha do administrador inicial do Wiki.js (opcional).
-# Descomente e preencha para configurar o administrador automaticamente no primeiro boot.
-# WIKI_ADMIN_EMAIL=admin@exemplo.com
-# WIKI_ADMIN_PASSWORD=sua_senha_admin_aqui
-```
-
-**ATENÇÃO:** É crucial que você substitua `sua_senha_secreta_aqui` por uma senha forte e única.
-
-### Passo 3.3: Criar o Arquivo Docker Compose (`docker-compose.yml`)
-
-Este arquivo define os dois serviços necessários: o banco de dados **PostgreSQL** e a aplicação **Wiki.js**.
-
-Crie o arquivo `docker-compose.yml` com a seguinte estrutura:
-
-```yaml
-version: '3.5'
-
-services:
-  database:
-    image: postgres:16-alpine
-    env_file:
-      - .env
-    container_name: wiki_db
-    environment:
-      POSTGRES_USER: wiki_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: wiki_db
-    volumes:
-      # Persiste os dados do banco de dados no diretório local ./data/db
-      - ./data/db:/var/lib/postgresql/data
-    restart: always
-
-  wiki:
-    image: ghcr.io/requarks/wiki:2
-    env_file:
-      - .env
-    container_name: wiki_app
-    environment:
-      DB_TYPE: postgres
-      DB_HOST: database
-      DB_PORT: 5432
-      DB_USER: wiki_user
-      DB_PASS: ${DB_PASSWORD}
-      DB_NAME: wiki_db
-      # Configuração inicial do administrador (opcional)
-      # WIKI_ADMIN_EMAIL: ${WIKI_ADMIN_EMAIL}
-      # WIKI_ADMIN_PASSWORD: ${WIKI_ADMIN_PASSWORD}
-    ports:
-      # Mapeia a porta 80 do seu host para a porta 3000 do container Wiki.js
-      - "80:3000"
-    depends_on:
-      - database
-    volumes:
-      # Persiste os arquivos de configuração e uploads do Wiki.js
-      - ./data/wiki:/var/lib/wikijs
-    restart: always
-```
-
-**Detalhes da Configuração:**
-
-*   **`database`:** Utiliza a imagem oficial do PostgreSQL. O volume `./data/db` garante que seus dados sejam persistidos mesmo se o container for recriado.
-*   **`wiki`:** Utiliza a imagem oficial do Wiki.js.
-    *   A porta `80:3000` significa que você acessará o wiki pela porta 80 (padrão HTTP) do seu servidor. Se a porta 80 estiver em uso, você pode mudá-la para, por exemplo, `"8080:3000"`.
-    *   O parâmetro `depends_on: database` garante que o container do banco de dados inicie antes do container do wiki.
-
-## 4. Inicialização do Servidor Wiki
-
-Com os arquivos configurados, o servidor wiki pode ser iniciado com um único comando:
+#### 1. Clonar o Repositório
 
 ```bash
-docker compose up -d
-```
+# Substitua <URL_DO_REPOSITORIO> pela URL real do nosso repositório Wiki
+git clone <URL_DO_REPOSITORIO>
+cd <nome-do-diretorio-wiki> 
+2. Criar e Editar Páginas
+Crie novos arquivos (as páginas do Wiki) ou edite os existentes em seu editor de código favorito.
 
-Este comando fará o seguinte:
-1.  Baixará as imagens Docker necessárias (PostgreSQL e Wiki.js).
-2.  Criará e iniciará os containers `wiki_db` e `wiki_app`.
-3.  Executará em segundo plano (`-d` de *detached*).
+Lembre-se: A extensão do arquivo define a sintaxe (ex: .md para Markdown, .rst para reStructuredText).
 
-Aguarde alguns minutos para que o PostgreSQL inicie e o Wiki.js conclua a configuração inicial.
+3. Fazer o Commit e o Push
+Após fazer suas alterações, use os comandos padrão do Git:
 
-Para verificar o *status* dos containers, use:
+Bash
 
-```bash
-docker compose ps
-```
+# Adiciona todos os arquivos alterados (ou use o nome do arquivo específico)
+git add . 
 
-## 5. Acesso e Configuração Inicial
+# Cria um commit com uma mensagem descritiva (Obrigatório!)
+git commit -m "feat: Adiciona documentação inicial para o módulo de Pagamentos" 
 
-Após a inicialização bem-sucedida, o seu servidor wiki estará acessível.
+# Envia as alterações para o repositório remoto (atualiza o Wiki)
+git push origin master 
+# (ou a branch principal que estiver sendo usada)
+📚 Sintaxe de Conteúdo Recomendada
+Recomendamos fortemente o uso da sintaxe Markdown (arquivos com extensão .md ou .markdown) por sua simplicidade e legibilidade.
 
-### Passo 5.1: Acessar a Interface
+Exemplo Rápido de Markdown:
+Markdown
 
-Abra seu navegador e digite o endereço IP ou nome de domínio do seu servidor. Se estiver rodando localmente e usou a porta 80, acesse:
+# Título Principal
 
-```
-http://localhost
-```
+## Subtítulo
 
-Se você alterou a porta para 8080, acesse: `http://localhost:8080`.
+Aqui está um parágrafo de texto normal.
 
-### Passo 5.2: Configuração do Administrador
+* Item de lista 1
+* Item de lista 2
 
-Na primeira vez que você acessar, o Wiki.js solicitará que você crie a conta de administrador.
+**Texto em Negrito** e *Texto em Itálico*.
 
-1.  Preencha o **Nome de Usuário**, **Email** e **Senha** para a sua conta de administrador.
-2.  Clique em **Instalar** (ou equivalente).
+[Link de Exemplo](http://exemplo.com)
+❓ Precisa de Ajuda?
+Se tiver dúvidas sobre o processo de contribuição, entre em contato com [Mencione o canal/contato de suporte aqui, ex: o canal #wiki-suporte no Slack].
 
-Se você preencheu as variáveis `WIKI_ADMIN_EMAIL` e `WIKI_ADMIN_PASSWORD` no arquivo `.env` (Passo 3.2), esta etapa será ignorada e a conta de administrador será criada automaticamente.
+Feliz colaboração!
 
-## 6. Comandos Úteis
+## 6. Comandos Úteis para subir gerir o container
 
 | Comando | Descrição |
 | :--- | :--- |
@@ -171,5 +96,5 @@ Se você preencheu as variáveis `WIKI_ADMIN_EMAIL` e `WIKI_ADMIN_PASSWORD` no a
 
 ## Referências
 
-[1] Wiki.js - The most powerful and extensible open source wiki software: https://js.wiki/
-[2] Docker Compose Documentation: https://docs.docker.com/compose/
+
+https://github.com/gollum/gollum
