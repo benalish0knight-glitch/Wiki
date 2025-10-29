@@ -11,3 +11,5 @@ services:
       # - "--config=/etc/gollum/config.rb" # if using config.rb
       - "--math"
       # - ... # your additional options here
+      - gollum /wiki
+      # - gollum /wiki --allow-editing
