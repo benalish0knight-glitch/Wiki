@@ -30,3 +30,7 @@ Thumbs.db
 # Arquivos de Ambiente de Editor (Exemplo: VS Code, se não for um projeto compartilhado)
 .vscode/
 .idea/
+
+.env
+
+__pycache__/

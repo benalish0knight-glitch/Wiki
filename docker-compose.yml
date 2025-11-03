@@ -34,7 +34,27 @@ services:
     ports:
     - "8080:8080"
 
+  api-manager:
+    build: .
+    depends_on:
+    - bookstack
+    ports:
+    - "8000:8000"
+    # O volume agora mapeia o diretório 'app' local para o diretório de trabalho do contêiner
+    volumes:
+    - ./app:/app/app
+    working_dir: /app
+    # O comando de execução agora aponta para o módulo 'app.main'
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    # Carrega variáveis de ambiente do arquivo .env
+    env_file:
+      - .env
+    # A URL do BookStack dentro da rede Docker é o nome do serviço: 'bookstack'
+    # Esta variável é definida aqui para garantir que esteja sempre presente.
+    environment:
+      BOOKSTACK_API_URL: http://bookstack:8080/api
+
 volumes:
- mysql-data:
- uploads:
- storage-uploads:
+  mysql-data:
+  uploads:
+  storage-uploads:
